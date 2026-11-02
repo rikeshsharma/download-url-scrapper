@@ -1,0 +1,122 @@
+# Conservative example configuration. All keys are optional; omitted keys use
+# the defaults shown in docs/configuration.md. Relative paths resolve against
+# this file's directory.
+
+collection:
+  name: example
+  data_dir: ../data
+  user_agent: "download-url-collector/0.1 (+research crawler; contact: ggltest666@gmail.com)"
+  robots_user_agent_token: download-url-collector
+
+scope:
+  include_subdomains: true        # crawl only the seed hostname by default
+  additional_domains: []           # extra domains whose pages may be crawled
+  verify_external_downloads: true  # verify explicitly linked off-site download targets (never crawled)
+  follow_external_redirects: true  # allow CDN redirects while probing/verifying candidates
+  psl_file: null                   # local Public Suffix List; bundled snapshot when null
+
+limits:
+  max_depth: 5
+  max_pages_per_seed: 40
+  max_pages_total: 100000
+  max_candidates_per_seed: 200
+  max_candidates_total: 100000
+  max_requests_total: 30000000
+  max_elapsed_seconds: 864000
+  max_download_bytes_total: 214748364800   # 2 GiB across probes and browser downloads
+  max_file_bytes: 20971520000              # 200 MiB per file, enforced during transfer
+  max_html_bytes: 52428800
+  probe_sniff_bytes: 655360
+  concurrency: 40
+  per_host_concurrency: 1
+  per_host_min_interval_seconds: 1.0
+  max_redirects: 15
+  max_meta_refresh: 5
+  max_sitemap_files: 50
+  max_sitemap_urls: 2000
+  request_timeout_seconds: 20
+
+politeness:
+  max_retries: 3
+  backoff_base_seconds: 1.0
+  backoff_max_seconds: 60
+  max_retry_after_seconds: 300
+  max_crawl_delay_seconds: 30
+  use_head: true
+
+traps:
+  max_url_length: 2048
+  max_path_segments: 15
+  max_repeated_segment: 2
+  max_query_params: 8
+  max_repeated_param: 1
+  max_urls_per_pattern: 25
+  max_urls_per_calendar_pattern: 5
+  max_candidates_per_pattern: 200
+
+network:
+  allow_cidrs: []                  # NEVER add private ranges in production
+  allowed_ports: [80, 443, 8080, 8443]
+
+browser:
+  enabled: true
+  executable_path: null            # path to the modified Chromium build; bundled Chromium when null
+  channel: chromium               # full Chromium (renders PDFs inline); ignored when executable_path is set
+  headless: true
+  chromium_sandbox: true
+  extra_args: []
+  navigation_timeout_seconds: 20
+  download_event_grace_seconds: 4
+  download_timeout_seconds: 20
+  verify_concurrency: 40
+  render_seed_pages: true
+  render_pages_with_controls: true
+  interaction:
+    enabled: true
+    max_controls_per_page: 5
+    post_click_wait_seconds: 5
+  egress_proxy: true
+  feature_collector: null          # "your_module:factory" — see docs/browser-integration.md
+
+inspection:
+  archives:
+    enabled: false                 # when false, archives stay "unresolved"
+    max_members: 1000
+    max_total_uncompressed_bytes: 536870912
+    max_compression_ratio: 100
+
+storage:
+  keep_files: true
+  max_storage_bytes: 5368709120
+
+sampling:
+  targets: {}                      # e.g. {family: {pe: 50, zip: 50}, label: {benign_validated: 100}}
+  caps:
+    per_domain: 200
+    per_publisher: 200
+    per_content_hash: 3
+
+adapters:
+  github_releases:
+    enabled: false
+    max_releases: 5
+    max_assets: 50
+    token_env: GITHUB_TOKEN
+
+labeling:
+  policy_file: labeling_policy.yaml
+  scanner:
+    type: clamav                   # clamav | mock | none
+    binary: clamscan
+  signature:
+    type: none                     # osslsigncode | mock | none
+  reputation:
+    enabled: false                 # hash lookups only; API key from VT_API_KEY
+    requests_per_minute: 4
+    daily_quota: 500
+  checksum_discovery: true
+
+dataset:
+  test_fraction: 0.2
+  unseen_domain_fraction: 0.15
+  temporal_cutoff: null

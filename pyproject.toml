@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "download-url-collector"
+version = "0.1.0"
+description = "Collect and verify browser download URLs for training a malicious-download detector."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+dependencies = [
+    "aiohttp>=3.9,<4",
+    "beautifulsoup4>=4.12",
+    "click>=8.1",
+    "defusedxml>=0.7",
+    "playwright>=1.44",
+    "protego>=0.3",
+    "pydantic>=2.6,<3",
+    "PyYAML>=6.0",
+    "tldextract>=5.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+download-url-collector = "download_url_collector.cli:main"
+duc = "download_url_collector.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+download_url_collector = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "browser: requires Playwright Chromium (skipped when unavailable)",
+]
+filterwarnings = ["ignore::DeprecationWarning:tldextract.*"]

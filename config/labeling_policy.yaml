@@ -1,0 +1,70 @@
+# Versioned labeling policy. Bump policy_version whenever any rule changes;
+# labels are stored with the version that produced them.
+#
+# Labels (evaluated in this order, first match wins):
+#   malicious_evidence  any fact in malicious_evidence_if is true
+#   suspicious          any fact in suspicious_if is true
+#   benign_validated    every fact in benign_validated.required is true AND at least
+#                       benign_validated.min_independent_positive distinct positive facts
+#   benign_candidate    at least benign_candidate.min_independent_positive positive facts
+#                       (requirements may be missing — the reasons column says which)
+#   unknown             otherwise (the starting state of every sample)
+#
+# Guarantees enforced when this file is loaded:
+#   * benign_validated needs >= 2 independent positive facts;
+#   * av_scan_clean is always required and never counts as positive evidence;
+#   * zero AV detections, an absent threat-feed entry, a valid signature, or a
+#     known domain therefore can never produce benign_validated on their own.
+#   * missing or stale required evidence blocks benign_validated.
+policy_version: "2026-10-25.1"
+description: >
+  Conservative default. Requires a fresh clean local AV scan with a fresh signature
+  database, complete content inspection, and two independent positive signals.
+
+max_evidence_age_days:
+  av_scan: 7            # scan older than this is stale
+  av_signature_db: 3    # signature DB older than this at scan time is stale
+  reputation: 30
+  signature: 365
+  publisher_checksum: 365
+  provenance: 365
+  manual_review: 365
+
+positive_evidence:
+  - publisher_provenance   # trusted publisher domains over HTTPS (+ checksum match if required)
+  - trusted_signature      # valid signature whose signer is listed for a trusted publisher
+  - reputation_clean       # fresh hash report, 0 malicious/suspicious, >= clean_min_engines
+  - manual_review_benign   # analyst verdict recorded with `duc review`
+
+benign_validated:
+  required: [av_scan_clean, inspection_complete]
+  min_independent_positive: 2
+
+benign_candidate:
+  required: []
+  min_independent_positive: 1
+
+malicious_evidence_if:
+  - av_detection
+  - reputation_malicious
+  - manual_review_malicious
+
+suspicious_if:
+  - publisher_checksum_mismatch
+  - signature_invalid
+  - reputation_suspicious
+  - manual_review_suspicious
+  - type_discrepancy_executable
+
+reputation:
+  malicious_min_engines: 2
+  suspicious_min_engines: 1
+  clean_min_engines: 50
+
+# Provenance is only granted for publishers listed here — popularity is never used.
+trusted_publishers: []
+#  - name: Example Project
+#    page_domains: [example.org]               # where the download link was found
+#    download_domains: [downloads.example.org] # where the file may be served from (CDNs)
+#    signers: ["Example Project Foundation"]   # accepted Authenticode signer subjects
+#    require_publisher_checksum: true          # provenance needs a matching publisher checksum

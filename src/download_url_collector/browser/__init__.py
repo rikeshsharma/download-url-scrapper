@@ -1,0 +1,1 @@
+"""Browser verification (Playwright + Chromium)."""

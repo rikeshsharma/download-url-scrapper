@@ -1,0 +1,6 @@
+url,note
+https://www.python.org/downloads/,seed page only - not a prevalidated benign label
+https://www.7-zip.org/download.html,seed page only - not a prevalidated benign label
+https://www.videolan.org/vlc/download-windows.html,seed page only - not a prevalidated benign label
+https://github.com/git-for-windows/git/releases,needs adapters.github_releases.enabled for API discovery
+ftp://example.invalid/not-allowed,invalid on purpose: only http/https are accepted
